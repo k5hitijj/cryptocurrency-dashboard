@@ -1,45 +1,54 @@
-import axios from "axios";
+import api from "../../api/coingecko";
 import actionTypes from "./types";
 
-// fetchCoins action 
+// Fetch top coins
 export const fetchCoins = () => {
-      return (dispatch) => {
-          axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&page=1&per_page=9`)
-          .then(response =>{
-              const data = response.data
-              dispatch({
-                type: actionTypes.COIN_API_SUCCESS,
-                payload: data
-              })
-          })
-          .catch(error =>{
-              const errorMsg = error.message
-              dispatch({
-                type: actionTypes.COIN_API_ERROR,
-                payload : errorMsg
-              })
-          })
-      }
-  }
-
-// exchange rate action
-export const fetchCoinList = () => {
   return (dispatch) => {
-    axios.get('https://api.coingecko.com/api/v3/exchange_rates')
-    .then(response =>{
-      const data = response.data
+    api
+      .get("/coins/markets", {
+        params: {
+          vs_currency: "usd",
+          order: "market_cap_desc",
+          page: 1,
+          per_page: 9,
+        },
+      })
+      .then((response) => {
+        dispatch({
+          type: actionTypes.COIN_API_SUCCESS,
+          payload: response.data,
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+
+        dispatch({
+          type: actionTypes.COIN_API_ERROR,
+          payload:
+            error.response?.data?.status?.error_message || error.message,
+        });
+      });
+  };
+};
+
+// Fetch exchange rates
+export const fetchCoinList = () => {
+  return async (dispatch) => {
+    try {
+      const response = await api.get("/exchange_rates");
+
       dispatch({
         type: actionTypes.EXCHANGE_SUCCESS,
-        payload: data
-      })
-    })
-      .catch(error => {
-        const errorMsg = error.message 
-        dispatch({
-          type: actionTypes.EXCHANGE_ERROR,
-          payload: errorMsg  
-      })
-    })
-  }
-}
+        payload: response.data,
+      });
+    } catch (error) {
+      console.error(error);
 
+      dispatch({
+        type: actionTypes.EXCHANGE_ERROR,
+        payload:
+          error.response?.data?.status?.error_message || error.message,
+      });
+    }
+  };
+};

@@ -1,66 +1,88 @@
 import { createContext, useLayoutEffect, useState } from "react";
 
-//create context object
+// Create context object
 export const CryptoContext = createContext({});
 
-/*cryptoContext component contains api data of cryptocoins,
- cryptoId and search cryptos and there states as well
-*/
 export const CryptoProvider = ({ children }) => {
-  const [cryptoId, setCryptoId] = useState();
-  const [cryptoData, setCryptoData] = useState();
+  const [cryptoId, setCryptoId] = useState([]);
+  const [cryptoData, setCryptoData] = useState([]);
   const [currency, setCurrency] = useState("usd");
   const [sortBy, setSortBy] = useState("market_cap_desc");
   const [page, setPage] = useState(1);
   const [totalPages] = useState(350);
   const [perPage, setPerPage] = useState(8);
-  const [searchData, setSearchData] = useState();
+  const [searchData, setSearchData] = useState([]);
   const [coinSearch, setCoinSearch] = useState("");
-  const [id , setCoinId] = useState("")
- 
+  const [id, setCoinId] = useState("");
+
+  const headers = {
+    "x-cg-demo-api-key": process.env.REACT_APP_COINGECKO_API_KEY,
+  };
+
+  // Fetch crypto market data
   const getCryptoData = async () => {
     try {
-      const data = await fetch(
-        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${coinSearch}&order=${sortBy}&page=${page}&per_page=${perPage}`
-      )
-        .then((res) => res.json())
-        .then((json) => json);
-      // console.log(data);
+      let url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=${sortBy}&page=${page}&per_page=${perPage}`;
+
+      if (coinSearch.trim() !== "") {
+        url += `&ids=${coinSearch}`;
+      }
+
+      const response = await fetch(url, {
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
       setCryptoData(data);
-      // console.log(data.length)
     } catch (error) {
-      console.log(error);
+      console.error("Crypto Data Error:", error);
     }
   };
 
+  // Fetch selected coin(s)
   const getCryptoId = async () => {
-    try {
-      const data = await fetch(
-        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${id}&order=market_cap_desc&page=1&per_page=200`
-      )
-        .then((res) => res.json())
-        .then((json) => json);
-      // console.log(data);
-      setCryptoId(data);
-      // console.log(data.length)
-    } catch (error) {
-      console.log(error);
-    }
-  };
+      try {
+        const response = await fetch(
+          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&page=1&per_page=200`,
+          {
+            headers,
+          }
+        );
 
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
 
+        const data = await response.json();
+
+        setCryptoId(data);
+      } catch (error) {
+        console.error("Crypto ID Error:", error);
+      }
+    };
+
+  // Search coins
   const getSearchResult = async (query) => {
     try {
-      const data = await fetch(
-        `https://api.coingecko.com/api/v3/search?query=${query}`
-      )
-        .then((res) => res.json())
-        .then((json) => json);
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/search?query=${query}`,
+        {
+          headers,
+        }
+      );
 
-      console.log(data);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
       setSearchData(data.coins);
     } catch (error) {
-      console.log(error);
+      console.error("Search Error:", error);
     }
   };
 
@@ -71,9 +93,12 @@ export const CryptoProvider = ({ children }) => {
   };
 
   useLayoutEffect(() => {
-    getCryptoData();
+  getCryptoData();
+}, [currency, sortBy, page, perPage, coinSearch]);
+
+  useLayoutEffect(() => {
     getCryptoId();
-  }, [currency, sortBy, page, perPage, coinSearch]);
+  }, [currency]);
 
   return (
     <CryptoContext.Provider
@@ -93,7 +118,8 @@ export const CryptoProvider = ({ children }) => {
         setCoinSearch,
         setSearchData,
         resetFunction,
-        cryptoId
+        cryptoId,
+        setCoinId,
       }}
     >
       {children}

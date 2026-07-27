@@ -3,6 +3,7 @@ import { Line, Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { CryptoContext } from "../context/CryptoContext";
 import selectIcon from "../assets/select-icon.svg";
+import api from "../api/coingecko";
 
 Chart.register(...registerables);
 
@@ -12,20 +13,28 @@ export const CryptoChart = () => {
   const [chartData, setChartData] = useState([]);
   const [days, setDays] = useState(2);
   const [id, setId] = useState("bitcoin");
-  const [interval, setInterval] = useState([]);
+  const [interval, setInterval] = useState("hourly");
   const [chartType, setChartType] = useState("LineChart");
 
   useEffect(() => {
-    fetch(
-      `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${currency}&days=${days}&interval=${interval}`
-    ).then((response) => {
-      const res = response.json();
-      res.then((data) => {
-        // console.log("chartData", data);
+    const fetchChart = async () => {
+      try {
+        const { data } = await api.get(`/coins/${id}/market_chart`, {
+          params: {
+            vs_currency: currency,
+            days,
+            interval,
+          },
+        });
+
         setChartData(data.prices);
-      });
-    });
-  }, [days, id, currency]);
+      } catch (err) {
+        console.error("Chart API Error:", err);
+      }
+    };
+
+    fetchChart();
+  }, [days, id, currency, interval]);
 
   const ChartData = chartData.map((value) => ({
     x: value[0],
