@@ -7,7 +7,7 @@ export const CryptoContext = createContext({});
 
 
 export const CryptoProvider = ({ children }) => {
-  const [, setCryptoId] = useState([]);
+  const [cryptoId, setCryptoId] = useState([]);
   const [cryptoData, setCryptoData] = useState([]);
   const [currency, setCurrency] = useState("usd");
   const [sortBy, setSortBy] = useState("market_cap_desc");
@@ -94,6 +94,7 @@ export const CryptoProvider = ({ children }) => {
   return (
     <CryptoContext.Provider
       value={{
+        cryptoId,
         cryptoData,
         currency,
         setCurrency,

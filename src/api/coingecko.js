@@ -10,6 +10,7 @@ api.interceptors.request.use((config) => {
     x_cg_demo_api_key: process.env.REACT_APP_COINGECKO_API_KEY,
   };
 
+
   return config;
 });
 
