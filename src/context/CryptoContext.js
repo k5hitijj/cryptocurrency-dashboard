@@ -1,4 +1,4 @@
-import { createContext, useLayoutEffect, useState } from "react";
+import { createContext, useCallback, useLayoutEffect, useState } from "react";
 
 // Create context object
 export const CryptoContext = createContext({});
@@ -13,14 +13,14 @@ export const CryptoProvider = ({ children }) => {
   const [perPage, setPerPage] = useState(8);
   const [searchData, setSearchData] = useState([]);
   const [coinSearch, setCoinSearch] = useState("");
-  const [id, setCoinId] = useState("");
+
 
   const headers = {
     "x-cg-demo-api-key": process.env.REACT_APP_COINGECKO_API_KEY,
   };
 
   // Fetch crypto market data
-  const getCryptoData = async () => {
+  const getCryptoData = useCallback(async () => {
     try {
       let url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=${sortBy}&page=${page}&per_page=${perPage}`;
 
@@ -41,10 +41,10 @@ export const CryptoProvider = ({ children }) => {
     } catch (error) {
       console.error("Crypto Data Error:", error);
     }
-  };
+  }, [currency, sortBy, page, perPage, coinSearch]);
 
   // Fetch selected coin(s)
-  const getCryptoId = async () => {
+  const getCryptoId = useCallback(async () => {
       try {
         const response = await fetch(
           `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&page=1&per_page=200`,
@@ -63,7 +63,7 @@ export const CryptoProvider = ({ children }) => {
       } catch (error) {
         console.error("Crypto ID Error:", error);
       }
-    };
+    }, [currency]);
 
   // Search coins
   const getSearchResult = async (query) => {
@@ -94,11 +94,11 @@ export const CryptoProvider = ({ children }) => {
 
   useLayoutEffect(() => {
   getCryptoData();
-}, [currency, sortBy, page, perPage, coinSearch]);
+}, [getCryptoData]);
 
   useLayoutEffect(() => {
-    getCryptoId();
-  }, [currency]);
+  getCryptoId();
+}, [getCryptoId]);
 
   return (
     <CryptoContext.Provider
@@ -118,8 +118,6 @@ export const CryptoProvider = ({ children }) => {
         setCoinSearch,
         setSearchData,
         resetFunction,
-        cryptoId,
-        setCoinId,
       }}
     >
       {children}

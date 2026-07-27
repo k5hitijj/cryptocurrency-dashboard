@@ -8,10 +8,10 @@ export const Footer = () => {
             Made with{" "}❤️{" "}
             <a
               class="link"
-              href="https://github.com/pavandeveloperr"
+              href="https://github.com/k5hitijj/cryptocurrency-dashboard"
               className="hover:underline hover:text-blue-400"
             >
-              Pavan Kulkarni{" "}
+              {" Sample"}
             </a>
           </h3>
         </div>

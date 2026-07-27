@@ -71,7 +71,11 @@ backdrop-blur-md z-10
                   key={coin.id}
                   onClick={() => selectCoin(coin.id)}
                 >
-                  <img className="w-[1rem] h-[1rem] mx-1.5" src={coin.thumb} />
+                  <img
+                    className="w-[1rem] h-[1rem] mx-1.5"
+                    src={coin.thumb}
+                    alt={coin.name}
+                  />
 
                   <span>{coin.id}</span>
                 </li>
