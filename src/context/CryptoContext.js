@@ -3,8 +3,12 @@ import { createContext, useCallback, useLayoutEffect, useState } from "react";
 // Create context object
 export const CryptoContext = createContext({});
 
+const headers = {
+    "x-cg-demo-api-key": process.env.REACT_APP_COINGECKO_API_KEY,
+  };
+
 export const CryptoProvider = ({ children }) => {
-  const [cryptoId, setCryptoId] = useState([]);
+  const [, setCryptoId] = useState([]);
   const [cryptoData, setCryptoData] = useState([]);
   const [currency, setCurrency] = useState("usd");
   const [sortBy, setSortBy] = useState("market_cap_desc");
@@ -15,9 +19,7 @@ export const CryptoProvider = ({ children }) => {
   const [coinSearch, setCoinSearch] = useState("");
 
 
-  const headers = {
-    "x-cg-demo-api-key": process.env.REACT_APP_COINGECKO_API_KEY,
-  };
+  
 
   // Fetch crypto market data
   const getCryptoData = useCallback(async () => {
