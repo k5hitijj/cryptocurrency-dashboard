@@ -1,11 +1,10 @@
 import { createContext, useCallback, useLayoutEffect, useState } from "react";
+import api from "../api/coingecko";
 
 // Create context object
 export const CryptoContext = createContext({});
 
-const headers = {
-    "x-cg-demo-api-key": process.env.REACT_APP_COINGECKO_API_KEY,
-  };
+
 
 export const CryptoProvider = ({ children }) => {
   const [, setCryptoId] = useState([]);
@@ -24,21 +23,21 @@ export const CryptoProvider = ({ children }) => {
   // Fetch crypto market data
   const getCryptoData = useCallback(async () => {
     try {
-      let url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=${sortBy}&page=${page}&per_page=${perPage}`;
+      const params = {
+        vs_currency: currency,
+        order: sortBy,
+        page,
+        per_page: perPage,
+      };
 
       if (coinSearch.trim() !== "") {
-        url += `&ids=${coinSearch}`;
+        params.ids = coinSearch;
       }
 
-      const response = await fetch(url, {
-        headers,
+      const { data } = await api.get("/coins/markets", {
+        params,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
       setCryptoData(data);
     } catch (error) {
       console.error("Crypto Data Error:", error);
@@ -47,41 +46,31 @@ export const CryptoProvider = ({ children }) => {
 
   // Fetch selected coin(s)
   const getCryptoId = useCallback(async () => {
-      try {
-        const response = await fetch(
-          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&page=1&per_page=200`,
-          {
-            headers,
-          }
-        );
+    try {
+      const { data } = await api.get("/coins/markets", {
+        params: {
+          vs_currency: currency,
+          order: "market_cap_desc",
+          page: 1,
+          per_page: 200,
+        },
+      });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        setCryptoId(data);
-      } catch (error) {
-        console.error("Crypto ID Error:", error);
-      }
-    }, [currency]);
+      setCryptoId(data);
+    } catch (error) {
+      console.error("Crypto ID Error:", error);
+    }
+  }, [currency]);
 
   // Search coins
   const getSearchResult = async (query) => {
     try {
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/search?query=${query}`,
-        {
-          headers,
-        }
-      );
+      const { data } = await api.get("/search", {
+        params: {
+          query,
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
       setSearchData(data.coins);
     } catch (error) {
       console.error("Search Error:", error);
